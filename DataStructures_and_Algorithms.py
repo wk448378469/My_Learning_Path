@@ -166,7 +166,7 @@ def new_insert(index,loc,L1):           #写的不太好这个~~~~
         part2list = L1[loc:]
         part1list.append(index)
         newlist = part1list + part2list
-    except OverError as e:         #上面没有发生错误，所以这个地方不会有这样的情况
+    except IndexError as e:         #上面没有发生错误，所以这个地方不会有这样的情况
         print ('except:',e)        
     print ("done")
     return newlist
@@ -186,9 +186,149 @@ new_insert('hahahah',5,a)
        a、好特么复杂。。。。。写不下去了,和1的主要区别就是加入一个指针去指向地址的数据，而不是像1一样根据地址的连续性来
        b、查找元素，取决于i的位置，最坏的情况为O(n)
        c、核心思想是工作指针后移
-       d、插入和删除就相对于顺序存储结构就差不多（在单链表上比较啊），第一次查找i位置是O(n)，之后移动指针就是O(1)了
+       d、插入和删除就相对于顺序存储结构就差不多（和单链表上比较啊），第一次查找i位置是O(n)，之后移动指针就是O(1)了
        e、但是如果是频繁的插入和删除，单链表的优势就越来越明显。
 '''
+# 创建一个线性表的链式存储结构（用python来实现的）
+class Sqlist(object):
+    def __init__(self,size):
+        self.data = list(None for _ in range(size))
+        self.lenth = 0
+        self.max_size = size
+    
+    def add_item(self,item):        #添加单个item
+        if self.lenth < self.max_size:
+            self.data[self.lenth] = item
+            self.lenth = self.lenth + 1
+        else:
+            raise IndexError ("List is full")
+    
+    def create_list(self,tar_list):    #添加一个list到线性表中
+        for i,item in enumerate(tar_list):
+            if self.lenth >= self.max_size:
+                raise IndexError ("List is full")
+            else:
+                self.add_item(tar_list[i])
+    
+    def delete(self,i):     #删除节点中某个值
+        if i >self.lenth or i < 0:
+            raise IndexError ("Index out of range")
+        else:
+            j = i
+            while j < self.lenth:
+                self.data[j-1] = self.data[j]
+                j = j + 1
+            self.data[self.lenth - 1] = None
+            self.lenth = self.lenth -1
+    
+    def get_elem(self,i):           #查找表中的某个值
+        if i > self.lenth or i < 0:
+            raise IndexError ("Index out of range")
+        else:
+            return self.data[i-1]
+        
+    def get_location(self,elem):    # 返回第一个节点为elem的位置
+        for i , item in enumerate(self.data):
+            if item == elem:
+                return i + 1
+            return -1
+    
+    def show_list(self):          #返回所有元素
+        for i , item in enumerate(self.data):
+            if item is not None:
+                print (self.data[i])
+            else:
+                print (' ')
+                break
+'''
+输入：
+if __name__ == '__main__':
+    sql = Sqlist(10)
+    ll = [1,2,3,4,5]
+    sql.create_list(ll)
+    sql.show_list()
+    sql.delete(1)
+    sql.show_list()
+    sql.get_elem(4)
+    b = sql.get_location(3)
+    print (b)
+'''
+
+'''
+    单链表结构与顺序存储结构的优缺点对比（分配方式、时间性能、空间性能）：
+    A、分配方式
+        顺序存储结构用一段连续的存储单元依次存储数据元素
+        单链表采用链式存储结构，用一组任意的存储单元存储数据元素
+    B、时间性能
+        1、查找：
+            顺序存储结构，O(1)
+            单链表，O(n)
+        2、插入和删除
+            顺序存储结构，O(n)
+            单链表，O(1)
+    C、空间性能
+        顺序存储结构需要预先分配存储空间，当然貌似现在也有动态分配存储空间的优化了
+        单链表不需要分配，只要有就好
+    
+    so，不同的应用场景用不同的吧~~~
+'''
+
+'''
+    一种特殊的链式结构——静态链表
+    理解起来就是古人们（汇编语言上面的吧可能）没有链式结构的时候用两个数组（顺序存储的）组成一个静态链表，其中一个数组存放指针一个存放数据.....
+    @_@ 聪明啊
+'''
+
+'''
+    例题：快速查找未知长度单链表的中间节点
+    anwser1：全部遍历一遍，然后算出长度后，在找到L/2位置的值，O(L+L/2) = O(3L/2)
+    anwser2：利用快慢指针来，设快指针一次跨两个，慢指针一次跨一个，当快指针遍历完后，慢指针刚好完成。O(2/L),快上三倍！！！
+'''
+
+# 循环链表~~~
+# 单链表只能向后，不能向前~所以就是单链表最后的指针不要指向空，而是指向到单链表的头就可以了
+# 实在是没写出来。。。很尴尬~~~
+
+# 约瑟夫问题
+# 41个人，第一个人开始报数，数到3这个人就自杀，后面的人继续从一开始，剩下两个人就不用自杀了，问站在那个位置可以跑路不自杀~
+# 抽象出问题就是，已知n个人（以编号1，2，3...n分别表示）围坐在一张圆桌周围。从编号为k的人开始报数，数到k的那个人被杀掉；他的下一个人又从1开始报数，数到k的那个人又被杀掉；依此规律重复下去，直到圆桌周围的人只剩最后一个。
+# 思路是：当k是1的时候，存活的是最后一个人，当k>=2的时候，构造一个n个元素的循环链表，然后依次杀掉第k个人，留下的最后一个或两个是可以存活的人 
+def Joseph(n,k):
+    if k == 1:
+        print ('survive:',n)
+        return 
+    p = 0      #用来标记列表位置用的
+    people = list(range(1,n+1))      # range函数不包括stop，所以要n+1
+    while True:
+        if len(people) == 1:
+            break
+        p = (p + (k - 1))%len(people)      #取余数的时候，如果被除数小于除数则，结果为被除数！！！涨知识了@_@
+        print ('kill:',people[p])
+        del people[p]
+    print ('survive:',people[0])
+
+'''
+输入：
+if __name__ == '__main__':
+    Joseph(10,4)
+    Joseph(11,4)
+    Joseph(20,5)
+'''
+#还有其他两个问题，诸如魔术师发牌问题、拉丁方阵问题等....太难了就不写了吧
+
+# 双向循环链表，类似于火车。。。有两个头
+def move(n):
+    if type(n) != int:
+        print ("wrong input")
+    if n>25:
+        n = n%25
+    a = list('abcdefghijklmnopqrstuvwxyz')
+    part1list = a[:n]
+    part2list = a[n:]
+    newlist = a[n:]+a[:n]
+    return newlist
+#感觉比课程中的c语言简单多了....
+
 
 
 
