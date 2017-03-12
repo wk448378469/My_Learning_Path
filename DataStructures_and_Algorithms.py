@@ -24,12 +24,13 @@ def sum2():
     return sum
         
 # 对比上面两个函数就会发现，sum1函数需要循环一百次，sum2则只需要执行一次即可。如果把i扩大到10000W就可以看出那个更好了。
-if __name__ =='__main__':
-    from timeit import Timer
-    t1 = Timer("sum1","from __main__ import sum1")
-    t2 = Timer("sum2","from __main__ import sum2")
-    print (t1.timeit(100000000))
-    print (t2.timeit(100000000))
+def test():
+    if __name__ =='__main__':
+        from timeit import Timer
+        t1 = Timer("sum1","from __main__ import sum1")
+        t2 = Timer("sum2","from __main__ import sum2")
+        print (t1.timeit(100000000))
+        print (t2.timeit(100000000))
 
 # 通过以上可以测试出sum2比sum1 相对来说快那么一些~
 # 算法的五个基本特征：输入、输出、有穷性、确定性、可行性
@@ -101,10 +102,93 @@ def Linear_order(n):
 # 空间复杂度就是n所占存储空间的函数啦~
 # 记为：S(n) = O(f(n))
 
-
 # part 4 线性表
+# 由0或N个数据元素组成的有限序列，要记得是有顺序关系的！！！
+# 重点落在：
+# 1、ta是序列，有先后顺序
+# 2、如果存在多个，则第一个无头，最后一个无尾，中间的有头有尾
+# 3、ta是有限的
+a = list("abcdefghijk")
+# 上面中，b的前驱是a，b的后驱是c……
+'''
+    数据类型：一组性质相同的值得集合及定义在此集合上的一些操作的总称。例如整型、浮点型等等
+    数据类型分为：原子类型（eg：整型、浮点型）、结构类型（eg：整数型数组）
+    抽象：抽取出事物具有的普遍性的本质。eg：美女、美女王某某
+    抽象数据类型：（ADT），是指一个数据模型及定义在该模型上的一组操作（类型+操作）
+'''
+'''
+    抽象数据类型的规范化描述：
+    ADT 抽象数据类型名
+    Data
+        数据元素之间逻辑关系的定义
+    Operation
+        操作
+    endADT
+'''
+'''
+    线性表的抽象数据类型
+    ADT 线性表
+    Data
+        数据对象集合为{a1，a2，a3……an}，每个元素的类型均为datatype。其中第一个元素只有前驱，最后一个元素只有后驱
+        其余元素有且只有一个前驱一个后驱。数据元素之间的关系是一对一的关系
+    Operation
+        1、InitList，初始化线性表
+        2、ListEmpty，是否为空表
+        3、ClearList，清空表
+        4、GetElem，返回特定位置的元素
+        5、LocateElem，查找是否有某个元素
+        6、ListInsert，插入新的元素
+        7、ListDelete,删除元素
+        ……
+    endADT
+'''
+# 写一个线性表的差集合，接收两个表，返回两个表的差集
+def union(L1,L2):
+    new_list = []
+    for item in L1:
+        if item not in L2:
+            new_list.append(item)
+    for item in L2:
+        if item not in L1:
+            new_list.append(item)
+    return new_list
+'''
+输入：
+a = ['a','b','c']
+b = ['d','c','a']
+print (union(a,b))
+'''
+
+# 写一个线性表的插入，不要用insert
+def new_insert(index,loc,L1):           #写的不太好这个~~~~
+    try:
+        part1list = L1[:loc]
+        part2list = L1[loc:]
+        part1list.append(index)
+        newlist = part1list + part2list
+    except OverError as e:         #上面没有发生错误，所以这个地方不会有这样的情况
+        print ('except:',e)        
+    print ("done")
+    return newlist
+'''
+输入：
+a = list(range(10))
+new_insert('hahahah',5,a)
+'''
+
+'''
+线性表的存储结构：
+   1、顺序存储结构（一个地址，一个值），需要：起始地址、最大存储量、当前长度
+       a、读取和存储时间复杂度都是O(1)，删除和插入的时间复杂度都是O(n)
+       b、优点就是快速根据位置查找元素，逻辑关系不需要增加存储空间
+       c、确定就是插入和删除需要移动元素，数据量大是就不固定的消耗存储了
+   2、链式存储结构（一个指针，一个地址，一个值）
+       a、好特么复杂。。。。。写不下去了,和1的主要区别就是加入一个指针去指向地址的数据，而不是像1一样根据地址的连续性来
+       b、查找元素，取决于i的位置，最坏的情况为O(n)
+       c、核心思想是工作指针后移
+       d、插入和删除就相对于顺序存储结构就差不多（在单链表上比较啊），第一次查找i位置是O(n)，之后移动指针就是O(1)了
+       e、但是如果是频繁的插入和删除，单链表的优势就越来越明显。
+'''
 
 
 
-
-                    
