@@ -330,5 +330,77 @@ def move(n):
 #感觉比课程中的c语言简单多了....
 
 
+# part5 栈和队列！！
+# 栈是线性表的一种具体表现，是非常重要的线性结构。
+# “后进先出” 就想手枪的子弹、或者像浏览器的后退按钮、或者像ps或axure的撤销操作
+# 只能在表尾部进行删除或插入的操作
+# 对于栈的表尾称为栈顶，表头称为栈底
+
+# 栈的插入，叫做push，进栈、压栈、入栈
+# 栈的删除，叫做pop，出栈、弹栈
+# 栈因为是一个线性表，所以也分为顺序存储结构和链式存储结构
+stack = [3,4,5]
+stack.append(6)     #进栈
+stack.pop()         #出栈
+#。。。这么写是不是有点不专业....
+class Stack(object):
+    def __init__(self,size):
+        self.size = size
+        self.stack = []
+    
+    def __str__(self):
+        return str(self.stack)
+    
+    def getSize(self):
+        return len(self.stack)
+    
+    def push(self,x):
+        # 入栈
+        if self.isfull():
+            raise Exception("满了别塞了")
+        self.stack.append(x)
+    
+    def pop(self):
+        # 出栈
+        if len(self.stack) == 0:
+            raise Exception("大哥是空的")
+        return self.stack.pop()
+    
+    def isfull(self):
+        if len(self.stack) == self.size:
+            return True
+        else:
+            return False
+
+# 就这样吧，测试一下
+'''
+if __name__ == '__main__':
+    stackTest = Stack(10)
+    for i in range(10):
+        stackTest.push(i)
+    print (stackTest.getSize())
+    print (stackTest.isfull())
+    print (stackTest)
+    
+    for i in range(6):
+        stackTest.pop()
+    
+    print (stackTest.getSize())
+'''
+# 在C语言里面呢，指针是指向地址的，地址呢又可以为空，所以这里其实有两种方法
+# 方法一呢就是top指针指向最后面一个带有内容的地址
+# 方法二呢就是top指针指向最后面一个带有内容的地址+1，理解起来就是指针永远在最后内容的后面一个，这样子可能更贴近实际的"栈"的定义吧
+# 上面的代码里面可能包含了出栈、入栈，其实还可以有清空栈L[:] = []，销毁栈....不知道怎么写,__del__(self)??
+
+# 栈的链式存储结构~，，，，知识点了解下得了。。。。
+# 栈的应用
+# 逆波兰表达式又称为后缀表达式....大致的意思就是(1-2)*(4+5)这样的中表缀达式呢，人一看就懂，也能快速算出来结果是-9
+# 但是计算机不喜欢这样的，因为需要很多的if来判断哪个要先计算哪个要后计算。。。所以有一天一个伟人想出来了。。。f***
+# 所以上面的用逆波兰表达式来就是：1 2 - 4 5 + * 。。。。鬼tm才能懂
+# 大致的意思就是，遇到数字就进栈，遇到运算符就出栈
+# 翻译一下就是：1和2先进栈，遇到-做减法，1和2出栈做减法，然后-1进栈，然后4和5进栈，然后遇到+做加法，4和5出栈做加法，然后9进栈，遇到* 则 1和-9出栈做乘法，然后-9不进栈！！！，最后返回-9和空栈
+# 所以做一下？？？？
+
+
 
 
