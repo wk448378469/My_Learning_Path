@@ -13,6 +13,7 @@ from sklearn.preprocessing import StandardScaler              # 数据标准化�
 from sklearn.metrics import precision_recall_curve,classification_report,roc_auc_score      #评估模型的包
 import matplotlib.pyplot as plt                             # 画图包
 import seaborn as sns
+from sklearn.grid_search import GridSearchCV         # 导入交叉验证的包
 
 df = pd.read_csv('C:/Users/carne/Desktop/adultTest.csv')
 
@@ -55,13 +56,13 @@ testX_std = std.transform(testX)
 #model A 未标准化
 lr = LogisticRegression()      #创建一个对象
 lr.fit(trainX,trainY)              #训练模型
-lr.score(testX,testY)               
+lr.score(testX,testY)                 # 准确度
 proba = lr.predict_proba(testX)[:,1]         # 获取模型0和1的概率，并且取出来true的
 
 #model B 标准化
 lr = LogisticRegression()
 lr.fit(trainX_std,trainY) 
-lr.score(testX_std,testY)
+lr.score(testX_std,testY)         
 proba1 = lr.predict_proba(testX_std)[:,1]
 
 
@@ -83,4 +84,17 @@ print (roc_auc_score(testY,proba))                                # 看一下auc
 print (roc_auc_score(testY,proba1))                               # 看一下auc的面积
 
 
+
+
 # model的交叉验证~
+param = {'C':[0.001,0.01,0.1,1,10],'max_iter':[100,250]}
+clf =GridSearchCV(lr,param,cv = 5,n_jobs = -1,verbose = 1,scoring='roc_auc')
+clf.fit(trainX_std,trainY)
+
+clf.grid_scores_       #查看每一组结果
+clf.best_params_      #最佳参数组合
+
+#{'C': 0.1, 'max_iter': 100} 这个组合最好，然后去测试集上试一下看有没有提升
+lr2 = LogisticRegression(C = 0.1 ,max_iter = 100 )
+lr2.fit(trainX_std,trainY) 
+lr2.score(testX_std,testY)          # 好像高了那么一点点~
