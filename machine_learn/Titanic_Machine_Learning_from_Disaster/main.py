@@ -231,16 +231,96 @@ Y_train = train_df['Survived']
 X_test = test_df.drop('PassengerId',axis = 1).copy()
 
 # logistic regression
+logreg = LogisticRegression()
+logreg.fit(X_train,Y_train)
+Y_pred_logreg = logreg.predict(X_test)
+acc_log = round(logreg.score(X_train,Y_train)*100,2)
+print (acc_log)  # 81.14
+
+# 看一下每个feature 的相关性
+coeff_df =pd.DataFrame(train_df.columns.delete(0))
+coeff_df.columns = ['Feature']
+coeff_df['Corelation'] = pd.Series(logreg.coef_[0])
+coeff_df.sort_values(by = 'Corelation',ascending = False)
+# 性别的正相关性比较高，Pclass的负相关性最高
+
+# SVM
+svc = SVC()
+svc.fit(X_train,Y_train)
+Y_pred_svc = svc.predict(X_test)
+acc_svc = round(svc.score(X_train,Y_train)*100,2)
+print (acc_svc)    #83.28
+
+# KNN
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train,Y_train)
+Y_pred_knn = knn.predict(X_test)
+acc_knn = round(knn.score(X_train,Y_train)*100,2)
+print (acc_knn)     #84.62
+
+# 朴素贝叶斯
+bayes = GaussianNB()
+bayes.fit(X_train,Y_train)
+Y_pred_bayes = bayes.predict(X_test)
+acc_bayes = round(bayes.score(X_train,Y_train)*100,2)
+print (acc_bayes)   #77.33
+
+# 感知器
+perceptron = Perceptron()
+perceptron.fit(X_train,Y_train)
+Y_pred_perceptron = perceptron.predict(X_test)
+acc_perceptron = round(perceptron.score(X_train,Y_train)*100,2)
+print (acc_perceptron)  #79.91
+
+# 线性SVC
+linear_svc = LinearSVC()
+linear_svc.fit(X_train,Y_train)
+Y_pred_linear_scv = linear_svc.predict(X_test)
+acc_linear_svc = round(linear_svc.score(X_train,Y_train)*100,2)
+print (acc_linear_svc)  #80.02
+
+# 随机梯度下降SGD-stochastic gradient descent
+sgd = SGDClassifier()
+sgd.fit(X_train,Y_train)
+Y_pred_sgd = sgd.predict(X_test)
+acc_sgd = round(sgd.score(X_train,Y_train)*100,2)
+print (acc_sgd)     #71.49
+
+# 决策树 decision tree
+decision_tree = DecisionTreeClassifier()
+decision_tree.fit(X_train,Y_train)
+Y_pred_decision_tree = decision_tree.predict(X_test)
+acc_decision_tree = round(decision_tree.score(X_train,Y_train)*100,2)
+print (acc_decision_tree)    #86.64
+
+# 随机森林 random  forest
+random_forest = RandomForestClassifier()
+random_forest.fit(X_train,Y_train)
+Y_pred_random_forest = decision_tree.predict(X_test)
+acc_random_forest = round(random_forest.score(X_train,Y_train)*100,2)
+print (acc_random_forest)   #86.08
 
 
 
+# 模型的评估（model evaluation）
+models_evaluation = pd.DataFrame({
+    'Model': ['Support Vector Machines', 'KNN', 'Logistic Regression', 
+              'Random Forest', 'Naive Bayes', 'Perceptron', 
+              'Stochastic Gradient Decent', 'Linear SVC', 
+              'Decision Tree'],
+    'Score': [acc_svc, acc_knn, acc_log, 
+              acc_random_forest, acc_bayes, acc_perceptron, 
+              acc_sgd, acc_linear_svc, acc_decision_tree]
+    })
+models_evaluation.sort_values(by='Score',ascending = False)
+# 貌似决策树是比较好的，等会换一些指标来看看结果
 
+submission = pd.DataFrame({
+        'PassengerId':test_df['PassengerId'],
+        'Survived':Y_pred_decision_tree
+        })
 
-
-
-
-
-
+submission.to_csv('C:/Users/carne/Desktop/submission.csv',index=False)
 
 
 
