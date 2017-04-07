@@ -21,6 +21,9 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import Perceptron  #感知器
 from sklearn.linear_model import  SGDClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.cross_validation import train_test_split    #分割数据集的
+from sklearn.metrics import precision_recall_curve,classification_report,roc_auc_score # 其他评估指标
+from sklearn.grid_search import GridSearchCV    #交叉验证的 
 
 
 #导入数据
@@ -224,100 +227,276 @@ for dataset in combine:
 train_df = train_df.drop(['FareBand'],axis=1)
 combine = [train_df,test_df]
 
-
 # 模型环节啦~
 X_train = train_df.drop('Survived',axis = 1)
 Y_train = train_df['Survived']
 X_test = test_df.drop('PassengerId',axis = 1).copy()
 
-# logistic regression
-logreg = LogisticRegression()
-logreg.fit(X_train,Y_train)
-Y_pred_logreg = logreg.predict(X_test)
-acc_log = round(logreg.score(X_train,Y_train)*100,2)
-print (acc_log)  # 81.14
+# 划分一下测试集和训练集,用训练集中的部分来训练，用测试集来看效果
+trainX,testX,trainY,testY = train_test_split(X_train,Y_train,train_size = 0.7)
 
-# 看一下每个feature 的相关性
-coeff_df =pd.DataFrame(train_df.columns.delete(0))
-coeff_df.columns = ['Feature']
-coeff_df['Corelation'] = pd.Series(logreg.coef_[0])
-coeff_df.sort_values(by = 'Corelation',ascending = False)
-# 性别的正相关性比较高，Pclass的负相关性最高
+# logistic regression
+logreg = LogisticRegression()     #有很多参数等会调一下...
+logreg.fit(trainX,trainY)
+logreg.score(testX,testY)   #0.7873
+proba_logistic = logreg.predict_proba(testX)[:,1]
+precision_logistic,recall_logistic,thresholds_logistic = precision_recall_curve(testY,proba_logistic)
+plt.plot(recall_logistic,precision_logistic,label ='logistic')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,logreg.predict(testX)))     #看一下F1值  0.79
+print (roc_auc_score(testY,proba_logistic))     # 看一下auc的面积 0.8587
+
+param_logreg = {'C':[0.001,0.01,0.1,1,10],'max_iter':[100,250]}
+clf = GridSearchCV(logreg,param_logreg,cv = 5,n_jobs = -1,verbose = 1 ,scoring = 'roc_auc')
+clf.fit(trainX,trainY)
+clf.grid_scores_
+clf.best_params_       # 看一下最佳组合C=0.1 max_iter=10，优化一下模型
+
+logreg = LogisticRegression(C = 0.1,max_iter = 100) # 我擦，怎么全面下降了....!!!
+logreg.fit(trainX,trainY)
+logreg.score(testX,testY)           # 0.7873
+proba_logistic = logreg.predict_proba(testX)[:,1]
+precision_logistic,recall_logistic,thresholds_logistic = precision_recall_curve(testY,proba_logistic)
+plt.plot(recall_logistic,precision_logistic,label ='logistic')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,logreg.predict(testX)))        #0.79
+print (roc_auc_score(testY,proba_logistic))         # 0.8571
 
 # SVM
-svc = SVC()
-svc.fit(X_train,Y_train)
-Y_pred_svc = svc.predict(X_test)
-acc_svc = round(svc.score(X_train,Y_train)*100,2)
-print (acc_svc)    #83.28
+svc = SVC(probability=True)
+svc.fit(trainX,trainY)
+svc.score(trainX,trainY)      # 0.8459
+proba_svc = svc.predict_proba(testX)[:,1]
+precision_svc,recall_svc,thresholds_svc = precision_recall_curve(testY,proba_svc)
+plt.plot(recall_svc,precision_svc,label ='svc')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,svc.predict(testX)))     #看一下F1值  0.81
+print (roc_auc_score(testY,proba_svc))     # 看一下auc的面积  0.8291
+
+param_svc = {'C':[0.001,0.01,0.1,1,10],'cache_size':[150,200,250],'max_iter':[100,150,250]}
+clf = GridSearchCV(svc,param_svc,cv = 5,n_jobs = -1,verbose = 1 ,scoring = 'roc_auc')
+clf.fit(trainX,trainY)
+clf.grid_scores_
+clf.best_params_  
+
+svc = SVC(probability = True,C = 1,cache_size = 150 , max_iter = 150)
+svc.fit(trainX,trainY)
+svc.score(trainX,trainY)      # 0.8459
+proba_svc = svc.predict_proba(testX)[:,1]
+precision_svc,recall_svc,thresholds_svc = precision_recall_curve(testY,proba_svc)
+plt.plot(recall_svc,precision_svc,label ='svc')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,svc.predict(testX)))     #看一下F1值  0.81
+print (roc_auc_score(testY,proba_svc))       # 0.8376
 
 # KNN
 knn = KNeighborsClassifier(n_neighbors=3)
-knn.fit(X_train,Y_train)
-Y_pred_knn = knn.predict(X_test)
-acc_knn = round(knn.score(X_train,Y_train)*100,2)
-print (acc_knn)     #84.62
+knn.fit(trainX,trainY)
+knn.score(trainX,trainY)  # 0.8635
+proba_knn = knn.predict_proba(testX)[:,1]
+precision_knn,recall_knn,thresholds_knn = precision_recall_curve(testY,proba_knn)
+plt.plot(recall_knn,precision_knn,label ='knn')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,knn.predict(testX)))     #看一下F1值  0.77
+print (roc_auc_score(testY,proba_knn))      # 0.8138
+
+param_knn = {'n_neighbors':[1,3,5,7,9],'leaf_size':[20,25,35],'p':[1,2,3]}
+clf = GridSearchCV(knn,param_knn,cv = 5,n_jobs = -1,verbose = 1 ,scoring = 'roc_auc')
+clf.fit(trainX,trainY)
+clf.grid_scores_
+clf.best_params_   #{'leaf_size': 35, 'n_neighbors': 7, 'p': 2}
+
+knn = KNeighborsClassifier(n_neighbors=7 , leaf_size = 35 , p = 2)
+knn.fit(trainX,trainY)
+knn.score(trainX,trainY)  # 0.8507
+proba_knn = knn.predict_proba(testX)[:,1]
+precision_knn,recall_knn,thresholds_knn = precision_recall_curve(testY,proba_knn)
+plt.plot(recall_knn,precision_knn,label ='knn')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,knn.predict(testX)))     #看一下F1值  0.77
+print (roc_auc_score(testY,proba_knn))      # 0.8304
+
 
 # 朴素贝叶斯
 bayes = GaussianNB()
-bayes.fit(X_train,Y_train)
-Y_pred_bayes = bayes.predict(X_test)
-acc_bayes = round(bayes.score(X_train,Y_train)*100,2)
-print (acc_bayes)   #77.33
+bayes.fit(trainX,trainY)
+bayes.score(trainX,trainY)        #0.7849
+proba_bayes = bayes.predict_proba(testX)[:,1]
+precision_bayes,recall_bayes,thresholds_bayes = precision_recall_curve(testY,proba_bayes)
+plt.plot(recall_bayes,precision_bayes,label ='bayes')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,bayes.predict(testX)))     #看一下F1值  0.78
+print (roc_auc_score(testY,proba_bayes))  # 0.8430
+# 贝叶斯没有参数...
+
 
 # 感知器
 perceptron = Perceptron()
-perceptron.fit(X_train,Y_train)
-Y_pred_perceptron = perceptron.predict(X_test)
-acc_perceptron = round(perceptron.score(X_train,Y_train)*100,2)
-print (acc_perceptron)  #79.91
+perceptron.fit(trainX,trainY)
+perceptron.score(trainX,trainY)     # 0.7592
+# 感知器没有那些评价标准貌似9_9
+ 
+param_perceptron = {'alpha':[0.0001,0.00005,0.00001,0.000005],'n_iter':[1,3,5]}
+clf = GridSearchCV(perceptron,param_perceptron,cv = 5,n_jobs = -1,verbose = 1 ,scoring = 'roc_auc')
+clf.fit(trainX,trainY)
+clf.grid_scores_
+clf.best_params_   # {'alpha': 0.0001, 'n_iter': 1}
+
+perceptron = Perceptron(alpha = 0.0001, n_iter = 1)
+perceptron.fit(trainX,trainY)
+perceptron.score(trainX,trainY)     # 0.6597
+
 
 # 线性SVC
 linear_svc = LinearSVC()
-linear_svc.fit(X_train,Y_train)
-Y_pred_linear_scv = linear_svc.predict(X_test)
-acc_linear_svc = round(linear_svc.score(X_train,Y_train)*100,2)
-print (acc_linear_svc)  #80.02
+linear_svc.fit(trainX,trainY)
+linear_svc.score(trainX,trainY)    # 0.7977
+# 线性SVC没有那些评价标准貌似9_9
+
+param_linear_svc = {'C':[0.01,0.1,1,5,10],'max_iter':[500,1000,1500]}
+clf = GridSearchCV(linear_svc,param_linear_svc,cv = 5,n_jobs = -1,verbose = 1 ,scoring = 'roc_auc')
+clf.fit(trainX,trainY)
+clf.grid_scores_
+clf.best_params_   # {'C': 0.1, 'max_iter': 500}
+
+linear_svc = LinearSVC(C = 0.1 , max_iter = 500)
+linear_svc.fit(trainX,trainY)
+linear_svc.score(trainX,trainY)    # 0.7994
+
 
 # 随机梯度下降SGD-stochastic gradient descent
-sgd = SGDClassifier()
-sgd.fit(X_train,Y_train)
-Y_pred_sgd = sgd.predict(X_test)
-acc_sgd = round(sgd.score(X_train,Y_train)*100,2)
-print (acc_sgd)     #71.49
+sgd = SGDClassifier(loss = 'log')
+sgd.fit(trainX,trainY)
+sgd.score(trainX,trainY)       # 0.8057
+proba_sgd = sgd.predict_proba(testX)[:,1]
+precision_sgd,recall_sgd,thresholds_sgd = precision_recall_curve(testY,proba_sgd)
+plt.plot(recall_sgd,precision_sgd,label ='sgd')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,sgd.predict(testX)))     #看一下F1值  0.78
+print (roc_auc_score(testY,proba_sgd))       # 0.8578
+
+param_sgd = {'n_iter':[1,3,5,10,20],'verbose':[1,2,3,4,5]}
+clf = GridSearchCV(sgd,param_sgd,cv = 5,n_jobs = -1,verbose = 1 ,scoring = 'roc_auc')
+clf.fit(trainX,trainY)
+clf.grid_scores_
+clf.best_params_    # {'n_iter': 3, 'verbose': 1}
+
+sgd = SGDClassifier(loss = 'log' , n_iter = 3 , verbose = 2)
+sgd.fit(trainX,trainY)
+sgd.score(trainX,trainY)       # 0.7913
+proba_sgd = sgd.predict_proba(testX)[:,1]
+precision_sgd,recall_sgd,thresholds_sgd = precision_recall_curve(testY,proba_sgd)
+plt.plot(recall_sgd,precision_sgd,label ='sgd')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,sgd.predict(testX)))     #看一下F1值  0.78
+print (roc_auc_score(testY,proba_sgd))  #0.8457
+
 
 # 决策树 decision tree
 decision_tree = DecisionTreeClassifier()
-decision_tree.fit(X_train,Y_train)
-Y_pred_decision_tree = decision_tree.predict(X_test)
-acc_decision_tree = round(decision_tree.score(X_train,Y_train)*100,2)
-print (acc_decision_tree)    #86.64
+decision_tree.fit(trainX,trainY)
+decision_tree.score(trainX,trainY)       # 0.8796有点高啊...
+proba_decision_tree = decision_tree.predict_proba(testX)[:,1]
+precision_decision_tree,recall_decision_tree,thresholds_decision_tree = precision_recall_curve(testY,proba_decision_tree)
+plt.plot(recall_decision_tree,precision_decision_tree,label ='decision_tree')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,decision_tree.predict(testX)))     # 看一下F1值  0.75
+print (roc_auc_score(testY,proba_decision_tree))    # 0.7569
 
-# 随机森林 random  forest
+param_decision_tree = {'criterion':['gini','entropy'],'max_features':['auto','sqrt','log2']}
+clf = GridSearchCV(decision_tree,param_decision_tree,cv = 5,n_jobs = -1,verbose = 1 ,scoring = 'roc_auc')
+clf.fit(trainX,trainY)
+clf.grid_scores_
+clf.best_params_    # {'criterion': 'entropy', 'max_features': 'auto'}
+
+decision_tree = DecisionTreeClassifier(criterion = 'entropy' , max_features = 'auto')
+decision_tree.fit(trainX,trainY)
+decision_tree.score(trainX,trainY)       # 0.8796有点高啊...
+proba_decision_tree = decision_tree.predict_proba(testX)[:,1]
+precision_decision_tree,recall_decision_tree,thresholds_decision_tree = precision_recall_curve(testY,proba_decision_tree)
+plt.plot(recall_decision_tree,precision_decision_tree,label ='decision_tree')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,decision_tree.predict(testX)))     # 看一下F1值  0.73
+print (roc_auc_score(testY,proba_decision_tree))  # 0.7449
+
+
+# 随机森林 random forest
 random_forest = RandomForestClassifier()
-random_forest.fit(X_train,Y_train)
-Y_pred_random_forest = decision_tree.predict(X_test)
-acc_random_forest = round(random_forest.score(X_train,Y_train)*100,2)
-print (acc_random_forest)   #86.08
+random_forest.fit(trainX,trainY)
+random_forest.score(trainX,trainY)       # 0.8748
+proba_random_forest = random_forest.predict_proba(testX)[:,1]
+precision_random_forest,recall_random_forest,thresholds_random_forest = precision_recall_curve(testY,proba_random_forest)
+plt.plot(recall_random_forest,precision_random_forest,label ='random_forest')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,random_forest.predict(testX)))     # 看一下F1值  0.79
+print (roc_auc_score(testY,proba_random_forest))     # 0.7943
 
 
+param_random_forest = {'n_estimators':[5,10,15,20]}
+clf = GridSearchCV(random_forest,param_random_forest,cv = 5,n_jobs = -1,verbose = 1 ,scoring = 'roc_auc')
+clf.fit(trainX,trainY)
+clf.grid_scores_
+clf.best_params_    # {'n_estimators': 15}
 
+random_forest = RandomForestClassifier(n_estimators = 15)
+random_forest.fit(trainX,trainY)
+random_forest.score(trainX,trainY)       # 0.8796
+proba_random_forest = random_forest.predict_proba(testX)[:,1]
+precision_random_forest,recall_random_forest,thresholds_random_forest = precision_recall_curve(testY,proba_random_forest)
+plt.plot(recall_random_forest,precision_random_forest,label ='random_forest')
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.legend()
+print (classification_report(testY,random_forest.predict(testX)))     # 看一下F1值  0.76
+print (roc_auc_score(testY,proba_random_forest))     # 0.7944
+
+# 因为上面的参数都是我瞎写的，毕竟我还不是很了解这些参数的意义，所以，我们来决定下哪下用默认的，那些调整
 # 模型的评估（model evaluation）
-models_evaluation = pd.DataFrame({
-    'Model': ['Support Vector Machines', 'KNN', 'Logistic Regression', 
-              'Random Forest', 'Naive Bayes', 'Perceptron', 
-              'Stochastic Gradient Decent', 'Linear SVC', 
-              'Decision Tree'],
-    'Score': [acc_svc, acc_knn, acc_log, 
-              acc_random_forest, acc_bayes, acc_perceptron, 
-              acc_sgd, acc_linear_svc, acc_decision_tree]
-    })
-models_evaluation.sort_values(by='Score',ascending = False)
-# 貌似决策树是比较好的，等会换一些指标来看看结果
+# 因为比之前增加了两个参数，一个是f1值，一个是roc的面积，所以一起看看吧
+
+models_data = pd.DataFrame(
+        {
+        'Score':[svc.score(trainX,trainY),knn.score(trainX,trainY),logreg.score(testX,testY),
+                random_forest.score(trainX,trainY),bayes.score(trainX,trainY),perceptron.score(trainX,trainY),
+                sgd.score(trainX,trainY),linear_svc.score(trainX,trainY),decision_tree.score(trainX,trainY)],
+        'Roc-auc':[roc_auc_score(testY,proba_svc),roc_auc_score(testY,proba_knn),roc_auc_score(testY,proba_logistic),roc_auc_score(testY,proba_random_forest),roc_auc_score(testY,proba_bayes),np.nan,
+            roc_auc_score(testY,proba_sgd),np.nan,roc_auc_score(testY,proba_decision_tree)],
+        },
+    index = ['Support Vector Machines','KNN','Logistic Regression','Random Forest','Naive Bayes','Perceptron','Stochastic Gradient Decent','Linear SVC','Decision Tree'])
+
+models_data.sort_values(by='Roc-auc',ascending = False)
+
+X_train = train_df.drop('Survived',axis = 1)
+Y_train = train_df['Survived']
+X_test = test_df.drop('PassengerId',axis = 1).copy()
 
 submission = pd.DataFrame({
         'PassengerId':test_df['PassengerId'],
-        'Survived':Y_pred_decision_tree
+        'Survived':logreg.predict(X_test)
         })
 
 submission.to_csv('C:/Users/carne/Desktop/submission.csv',index=False)
