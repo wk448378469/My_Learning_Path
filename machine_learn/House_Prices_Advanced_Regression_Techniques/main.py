@@ -7,12 +7,12 @@ Created on Wed Apr 12 10:03:09 2017
 
 import pandas as pd
 import numpy as np
-from scipy.stats import skew
+from scipy.stats import skew     # 求峰度的
 import xgboost as xgb
 from sklearn.cross_validation import KFold
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error   
 from sklearn.linear_model import Ridge, RidgeCV, ElasticNet, LassoCV, Lasso
 from math import sqrt
 
@@ -154,7 +154,7 @@ plt.scatter(df_train['GrLivArea'],df_train['SalePrice']) #与之前相比更有�
 
 #开始搞事
 TARGET = 'SalePrice'
-NFOLDS = 5
+NFOLDS = 5        # 几个基模型
 SEED = 0
 NROWS = None
 SUBMISSION_FILE = 'C:/Users/carne/Desktop/submission.csv'
@@ -170,27 +170,28 @@ train.drop([TARGET],axis = 1,inplace = True)
 
 all_data = pd.concat((train.loc[:,'MSSubClass':'SaleCondition'],test.loc[:,'MSSubClass':'SaleCondition']))
 
-numeric_feats = all_data.dtypes[all_data.dtypes != 'object'].index
+numeric_feats = all_data.dtypes[all_data.dtypes != 'object'].index   #找出feature中是数值的
 
-skewed_feats = train[numeric_feats].apply(lambda x :skew(x.dropna()))
-skewed_feats = skewed_feats[skewed_feats > 0.75]
-skewed_feats = skewed_feats.index
+skewed_feats = train[numeric_feats].apply(lambda x :skew(x.dropna())) #计算数值型的偏度
+skewed_feats = skewed_feats[skewed_feats > 0.75]       #丢掉偏度太小的
+skewed_feats = skewed_feats.index           
 
-all_data[skewed_feats] = np.log1p(all_data[skewed_feats])
+all_data[skewed_feats] = np.log1p(all_data[skewed_feats])      # 把所有数值型的log
 
 all_data = pd.get_dummies(all_data)  # one hot code
 
-all_data = all_data.fillna(all_data.mean())
+all_data = all_data.fillna(all_data.mean())     # 补全缺失数据用均值
 
 x_train = np.array(all_data[:train.shape[0]])
 x_text = np.array(all_data[train.shape[0]:])
 
-kf = KFold(ntrain,n_folds=NFOLDS,shuffle=True,random_state=SEED)
+kf = KFold(ntrain,n_folds=NFOLDS,shuffle=True,random_state=SEED) # 交叉验证用的,分成5份
 
 class SklearnWrapper(object):
+    # 把模型方法包装起来
     def __init__(self,clf,seed=0,params=None):
         params['random_state'] = seed
-        self.clf = clf(**params)
+        self.clf = clf(**params)     # 把参数这个字段，用关键字参数的形式传给模型
     
     def train(self,x_train,y_train):
         self.clf.fit(x_train,y_train)
@@ -216,13 +217,13 @@ def get_oof(clf):
     oof_test = np.zeros((ntest,))
     oof_test_skf = np.empty((NFOLDS,ntest))
     
-    for i,(train_index,test_index) in enumerate(kf):
+    for i,(train_index,test_index) in enumerate(kf): # 把刚刚交叉的数据分别取出来
         x_tr = x_train[train_index]
         y_tr = y_train[train_index]
         x_te = x_train[test_index]
-        clf.train(x_tr,y_tr)
-        oof_train[test_index] = clf.predict(x_te)
-        oof_test_skf[i,:] = clf.predict(x_text)
+        clf.train(x_tr,y_tr)        # 用4份来训练
+        oof_train[test_index] = clf.predict(x_te)       # 用一份来看预测结果
+        oof_test_skf[i,:] = clf.predict(x_text)         # 把结果存到oof_test_skf中
     oof_test[:] = oof_test_skf.mean(axis = 0)
     return oof_train.reshape(-1,1) , oof_test.reshape(-1,1)
 
@@ -267,12 +268,14 @@ ls_params={
     'alpha': 0.005
 }
 
+# 创建模型对象
 xg = XgbWrapper(seed = SEED,params=xgb_params)
 et = SklearnWrapper(clf =ExtraTreesRegressor,seed = SEED,params=et_params)
 rf = SklearnWrapper(clf=RandomForestRegressor, seed=SEED, params=rf_params)
 rd = SklearnWrapper(clf=Ridge, seed=SEED, params=rd_params)
 ls = SklearnWrapper(clf=Lasso, seed=SEED, params=ls_params)
 
+# 每个模型进行交叉验证
 xg_oof_train, xg_oof_test = get_oof(xg)
 et_oof_train, et_oof_test = get_oof(et)
 rf_oof_train, rf_oof_test = get_oof(rf)
@@ -313,7 +316,7 @@ best_nrounds = res.shape[0] - 1
 cv_mean = res.iloc[-1, 0]
 cv_std = res.iloc[-1, 1]
 
-print('Ensemble-CV: {0}+{1}'.format(cv_mean, cv_std))
+print('Ensemble-CV: {0}±{1}'.format(cv_mean, cv_std))
 
 gbdt = xgb.train(xgb_params, dtrain, best_nrounds)
 
