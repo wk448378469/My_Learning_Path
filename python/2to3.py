@@ -6,7 +6,7 @@ Created on Fri May  5 14:34:10 2017
 """
 
 
-# 在CMD中，转移至目录至需转换文件的目录下
+# 在CMD中，转移目录至需转换文件的目录下
 # 执行下列命令：
 # python C:\Users\carne\Anaconda3\Scripts\2to3-script.py -w myfile.py
 
