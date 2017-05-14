@@ -44,6 +44,32 @@ myDatTest = regTrees.loadDataSet('ex2test.txt')
 myMat2Test = np.mat(myDatTest)
 regTrees.prune(myTree,myMat2Test)   # 你真的剪了么。。。。
 
+# 模型树部分了
+reload(regTrees)
+myMat2 = np.mat(regTrees.loadDataSet('exp2.txt'))
+regTrees.createTree(myMat2,regTrees.modelLeaf,regTrees.modelErr,(1,10))    # 区别就是调用方法时选择不同的生成叶节点的方法和误差计算
+
+
+# 模型比较
+reload(regTrees)
+trainMat = np.mat(regTrees.loadDataSet('bikeSpeedVsIq_train.txt'))
+testMat = np.mat(regTrees.loadDataSet('bikeSpeedVsIq_test.txt'))
+myTree = regTrees.createTree(trainMat,ops=(1,20))
+yHat = regTrees.createForeCast(myTree,testMat[:,0]) # 创建一个回归树
+np.corrcoef(yHat,testMat[:,1],rowvar=0)[0,1]
+
+myTree = regTrees.createTree(trainMat,regTrees.modelLeaf,regTrees.modelErr,(1,20)) #同意的数据创建一个模型树
+yHat = regTrees.createForeCast(myTree,testMat[:,0],regTrees.modelTreeEval)
+np.corrcoef(yHat,testMat[:,1],rowvar=0)[0,1]    # 好像稍微高那么一些
+
+ws,X,Y = regTrees.linearSolve(trainMat)   # 再试一下普通的线性回归
+for i in range(np.shape(testMat)[0]):
+    yHat[i] = testMat[i,0] * ws[1,0] + ws[0,0]
+np.corrcoef(yHat,testMat[:,1],rowvar=0)[0,1]    # 好像最低的
+
+# 大致应该是：模型树>回归树>线性回归
+
+
 
 
 

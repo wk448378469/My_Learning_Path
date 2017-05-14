@@ -106,3 +106,65 @@ def prune(tree, testData):
         else: return tree
     else: return tree
     
+def linearSolve(dataSet):
+    # 和上一节的线性回归没什么差异性
+    m,n = np.shape(dataSet)
+    X = np.mat(np.ones((m,n)))
+    Y = np.mat(np.ones((m,1)))
+    X[:,1:n] = dataSet[:,0:n-1]     # 这里X的第一列全市0，有啥子用呢？
+    Y = dataSet[:,-1]
+    xTx = X.T * X
+    if np.linalg.det(xTx) == 0.0:
+        raise NameError('this matrix is singular , cannot do inverse. you can try increasing the second value of ops')
+    ws = xTx.I * (X.T * Y)
+    return ws,X,Y
+
+def modelLeaf(dataSet):
+    # 获取数据集、标签和参数矩阵
+    ws,X,Y = linearSolve(dataSet)
+    return ws
+
+def modelErr(dataSet):
+    # 计算模型错误
+    ws,X,Y = linearSolve(dataSet)
+    yHat = X * ws
+    return sum(np.power(Y - yHat,2))
+
+
+def regTreeEval(model,inDat):
+    return float(model)
+
+def modelTreeEval(model,inDat):
+    n = np.shape(inDat)[1]
+    X = np.mat(np.ones((1,n+1)))
+    X[:,1:n+1] = inDat
+    return float(X*model)
+
+def treeForeCast(tree,inData,modelEval=regTreeEval):
+    # 预测输入的数据在模型下的预测值
+    if not isTree(tree):
+        return modelEval(tree,inData)
+    if inData[tree['spInd']] > tree['spVal']:
+        if isTree(tree['left']):
+            return treeForeCast(tree['left'],inData,modelEval)
+        else:
+            return modelEval(tree['left'],inData)
+    else:
+        if isTree(tree['right']):
+            return treeForeCast(tree['right'],inData,modelEval)
+        else:
+            return modelEval(tree['right'],inData)
+
+def createForeCast(tree,testData,modelEval=regTreeEval):
+    m = len(testData)
+    yHat = np.mat(np.zeros((m,1)))
+    for i in range(m):
+        yHat[i,0] = treeForeCast(tree,np.mat(testData[i]),modelEval)
+    return yHat
+
+
+    
+    
+    
+    
+    
