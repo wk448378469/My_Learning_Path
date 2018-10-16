@@ -7,12 +7,12 @@
 >>>*. getXX() 获取属性
 >>>*. measurementsChanged() 状态变化，调用Observable中的setChanged与notifyObservers方法
 >>>*. notifyObservers方法为向观察者推送新的数据
-
-
 >一对多中的“多”：
 >>CurrentConditionsDisplay.java、ForecastDisplay.java、StatisticsDisplay.java
 >>>*. 实现DisplayElement.java, Observer.java这两个接口
->>>*. asd
+>>>*. 初始化的时候调用Observer中的addObserver方法，将实例化的自己加入至Observable的观察者列表中
+>>>*. update() 实现Observer接口中的方法，接收更新的数据
+>>>*. display() 实现DisplayElement接口中的方法，展示数据
 
 
 
