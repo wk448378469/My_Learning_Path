@@ -13,5 +13,10 @@
     3. update() 实现Observer接口中的方法，接收更新的数据
     4. display() 实现DisplayElement接口中的方法，展示数据
 
+* 测试类 WeatherStation.java
+
+* java9 之后Observable.java 和 Observer.java 均已被弃用了
+    1. 如果以后实践可以用书中介绍的第一部分自己实现
+    2. 弃用的原因见这里：https://stackoverflow.com/questions/46380073/observer-is-deprecated-in-java-9-what-should-we-use-instead-of-it
 
 
