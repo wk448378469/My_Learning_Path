@@ -33,32 +33,32 @@
 
 * 原材料实现，实现上面6个接口的
     1. Veggies.java的下列实现：
-        1.1. BlackOlives.java       黑橄榄
-        1.2. Eggplant.java          茄子
-        1.3. Garlic.java            大蒜
-        1.4. Mushroom.java          蘑菇
-        1.5. Onion.java             洋葱
-        1.6. RedPepper.java         红辣椒
-        1.7. Spinach.java           菠菜
+        * BlackOlives.java       黑橄榄
+        * Eggplant.java          茄子
+        * Garlic.java            大蒜
+        * Mushroom.java          蘑菇
+        * Onion.java             洋葱
+        * RedPepper.java         红辣椒
+        * Spinach.java           菠菜
 
     2. Dough.java的下列实现：
-        2.1. ThickCrustDough.java    厚皮面团
-        2.2. ThinCrustDough.java     薄皮面团
+        * ThickCrustDough.java    厚皮面团
+        * ThinCrustDough.java     薄皮面团
 
     3. Sauce.java的下列实现：
-        3.1. MarinaraSauce.java      番茄酱
-        3.2. PlumTomatoSauce.java    李子番茄酱
+        * MarinaraSauce.java      番茄酱
+        * PlumTomatoSauce.java    李子番茄酱
 
     4. Cheese.java的下列实现：
-        4.1. MozzarellaCheese.java   莫扎里拉干酪
-        4.2. ParmesanCheese.java     意大利干酪
-        4.3. ReggianoCheese.java     雷吉诺奶酪
+        * MozzarellaCheese.java   莫扎里拉干酪
+        * ParmesanCheese.java     意大利干酪
+        * ReggianoCheese.java     雷吉诺奶酪
 
     5. Clam.java的下列实现：
-        5.1. FreshClams.java         鲜蛤
-        5.2. FrozenClams.java        冻蛤
+        * FreshClams.java         鲜蛤
+        * FrozenClams.java        冻蛤
 
     6. Pepperoni.java的下列实现：
-        6.1. SlicedPepperoni.java    意大利辣香肠
+        * SlicedPepperoni.java    意大利辣香肠
 
 * 测试类 PizzaTestDrive.java
