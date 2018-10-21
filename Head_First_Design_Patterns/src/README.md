@@ -5,3 +5,4 @@
     * simple_factory        简单工厂
     * factory               工厂方法模式
     * abstract_factory      抽象工厂模式
+    * singleton             单件模式
