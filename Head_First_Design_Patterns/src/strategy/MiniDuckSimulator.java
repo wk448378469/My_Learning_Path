@@ -1,4 +1,4 @@
-package ducks;
+package strategy;
 
 public class MiniDuckSimulator {
     public static void main(String[] agrs){

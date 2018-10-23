@@ -1,4 +1,4 @@
-package ducks;
+package strategy;
 
 public abstract class Duck {
     FlyBehavior flyBehavior;
@@ -17,7 +17,7 @@ public abstract class Duck {
     }
 
     public void swim(){
-        System.out.println("All ducks float, even decoys");
+        System.out.println("All strategy float, even decoys");
     }
 
     public void setFlyBehavior(FlyBehavior fb){

@@ -27,7 +27,7 @@ class Duck(object):
         self.quackBehavior.quack()
     
     def swim(self):
-        print("All ducks float, even decoys")
+        print("All strategy float, even decoys")
     
     def setFlyBehavior(self, fb):
         if (isinstance(fb, FlyBehavior)):
