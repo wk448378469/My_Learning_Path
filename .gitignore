@@ -3,3 +3,5 @@
 Head_First_Design_Patterns/Head_First_Design_Patterns.iml
 *.pyc
 *.exe
+*.class
+*.xml
