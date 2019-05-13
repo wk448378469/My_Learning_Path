@@ -13,6 +13,8 @@
 /deeplearning.ai/Convolutional_Neural_Networks/week4/.ipynb_checkpoints
 /deeplearning.ai/Convolutional_Neural_Networks/week4/__pycache__
 Head_First_Design_Patterns/Head_First_Design_Patterns.iml
+/deeplearning.ai/Recurrent_Neural_Networks/week2/Word Vector Representation/data/glove.6B.50d.txt
+/deeplearning.ai/Recurrent_Neural_Networks/week2/Emojify/data/glove.6B.50d.txt
 *.pyc
 *.exe
 *.class
